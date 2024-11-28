@@ -150,9 +150,13 @@ def expected_max(state:Node):
 
     expected_value = 0.6*max_value
     if max_child_index-1 >= 0:
-        expected_value+=0.4*values[max_child_index-1]
+        expected_value+=0.2*values[max_child_index-1]
+    else:
+        expected_value+=0.2*max_value
     if max_child_index+1 < n:
-         expected_value+=0.4*values[max_child_index+1]
+         expected_value+=0.2*values[max_child_index+1]
+    else:
+        expected_value+=0.2*max_value
 
     state.set_best_move(best_move)
     state.set_value(expected_value)
@@ -177,9 +181,13 @@ def expected_min(state:Node):
 
     expected_value = 0.6*min_value
     if min_child_index-1 >= 0:
-        expected_value+=0.4*values[min_child_index-1]
+        expected_value+=0.2*values[min_child_index-1]
+    else:
+        expected_value+=0.2*min_value
     if min_child_index+1 < n:
-         expected_value+=0.4*values[min_child_index+1]
+         expected_value+=0.2*values[min_child_index+1]
+    else:
+        expected_value+=0.2*min_value
 
     state.set_best_move(best_move)
     state.set_value(expected_value)
