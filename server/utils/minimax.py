@@ -1,5 +1,11 @@
-from Node import Node 
-from tree import generate_tree
+import sys
+import os
+
+# Add the project's root directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.Node import Node
+from utils.tree import generate_tree
 
 player1='r'
 player2='y'
