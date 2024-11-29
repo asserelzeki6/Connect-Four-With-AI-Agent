@@ -51,7 +51,7 @@ def min_without_pruning(state:Node):
     best_move = None
 
     for child in state.children:
-        value = max_without_pruning(child)
+        _, value = max_without_pruning(child)
         if value < min_value:
             best_move, min_child, min_value = child.move, child, value
 

@@ -1,59 +1,96 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcomeFallback from '$lib/images/svelte-welcome.png';
+    import { goto } from '$app/navigation';
+    let playerChoice = 'r';  // Default player
+    let algorithm = 'minimax';  // Default algorithm
+    let rows = 6;
+    let cols = 7;
+    let showTree = false;
+    let maxDepth = 4;
+
+    function startGame() {
+        const queryParams = new URLSearchParams({
+            player: playerChoice,
+            algorithm,
+            rows: rows.toString(),
+            cols: cols.toString(),
+            maxDepth: maxDepth.toString(),
+        });
+        goto(`/connect-four?${queryParams.toString()}`);
+    }
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+    <title>Connect Four</title>
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcomeFallback} alt="Welcome" />
-			</picture>
-		</span>
+<main>
+    <h1>Welcome to Connect Four!</h1>
+    <form on:submit|preventDefault={startGame} class="settings-form">
+        <label>
+            Choose Your Player:
+            <select bind:value={playerChoice}>
+                <option value="r">Player 1 (Red)</option>
+                <option value="y">Player 2 (Yellow)</option>
+            </select>
+        </label>
 
-		to your new<br />SvelteKit app
-	</h1>
+        <label>
+            AI Algorithm:
+            <select bind:value={algorithm}>
+                <option value="minimax">Minimax</option>
+                <option value="alphaBeta">Minimax with Alpha-Beta Pruning</option>
+                <option value="expected">Expected Minimax</option>
+            </select>
+        </label>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+        <label>
+            Board Rows: <input type="number" min="4" max="10" bind:value={rows} />
+        </label>
 
-	<Counter />
-</section>
+        <label>
+            Board Columns: <input type="number" min="4" max="10" bind:value={cols} />
+        </label>
+
+        <label>
+            Max Tree Depth: <input type="number" min="1" max="10" bind:value={maxDepth} />
+        </label>
+
+        <button type="submit">Start Game</button>
+    </form>
+</main>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+    }
+    h1 {
+        margin-bottom: 1.5rem;
+    }
+    .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 300px;
+    }
+    label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.1rem;
+    }
+    input, select {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
 </style>

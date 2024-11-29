@@ -10,8 +10,8 @@ import copy
 
 empty = '.'
 
-def generate_tree(board, starting_player, player1, player2, max_height):
-    root = Node(board)
+def generate_tree(root:Node, starting_player, player1, player2, max_height):
+    # root = Node(board)
     recursive_generation_tree(root, starting_player, max_height,player1, player2)
     return root
 
@@ -20,7 +20,6 @@ def recursive_generation_tree(root:Node, player, max_height,player1,player2):
     if max_height==0 : 
         root.set_value(board_score(root.board,player1,player2)) #### CHANGE HERE THE HEURISTIC 
         return
-
     generate_children(root,player)
     if player == player1:
         player=player2
@@ -32,6 +31,10 @@ def recursive_generation_tree(root:Node, player, max_height,player1,player2):
         root.set_value(board_score(root.board,player1,player2))
 
 def generate_children(parent:Node, player):
+    # print("Parent board type is: ", type(parent.board))
+    # print("Parent board is: ", parent.board)
+    # print("Parent board row is: ", len(parent.board))
+    # print("Parent board col is: ", len(parent.board[0]))
     board=parent.board
     col=len(board[0])
     for j in range(col):
@@ -40,7 +43,10 @@ def generate_children(parent:Node, player):
             new_board = copy.deepcopy(board)
             new_board[r][j]=player
             move = j
+            # print(f"Adding child for player {player} at row {r}, column {j}")
             parent.addChild(new_board, move)
+        # else:
+            # print(f"Column {j} is full, skipping this move.")
 
 def playable_row(board, j):
     row = len(board)
