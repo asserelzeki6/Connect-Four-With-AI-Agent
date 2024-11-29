@@ -45,17 +45,17 @@
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
-            console.log('Server response:', result);
+            //console.log('Server response:', result);
             // tree = result.data;
             bestMove = result.best_move;
             tree = result;
-            console.log('Best move:', bestMove);
+            //console.log('Best move:', bestMove);
             if (bestMove !== null) {
                 dropDisc(bestMove);
             }
             /////////////////////////////
             // bestMove = result;
-            //console.log('Best move:', bestMove);
+            ////console.log('Best move:', bestMove);
             // if (bestMove !== null) {
             //     dropDisc(bestMove);
             // }
@@ -65,18 +65,24 @@
             // return result.data;
         } catch (error) {
             console.error('Error sending game data:', error);
+            setTimeout(() => {
+            //console.log('Executed after 2 seconds');
+            }, 100);
+            if (currentPlayer !== player) {
+                AiMove(board, player, algorithm, maxDepth);
+            }
         }
     }
     
     function toggleTree() {
-        // //console.log('Show tree');
+        // ////console.log('Show tree');
         showTree = !showTree;
     }
 
     function dropDisc(col=0) {
         if (winner) return;
-        //console.log(board);
-        //console.log('Dropping disc in column:', col);
+        ////console.log(board);
+        ////console.log('Dropping disc in column:', col);
         check_endgame();
         for (let row = ROWS - 1; row >= 0; row--) {
             if (board[row][col]==='.') {
@@ -84,7 +90,7 @@
                 // if (checkWinner()) {
                 //     winner = currentPlayer;
                 // } else {
-                //console.log('Current player:', currentPlayer);
+                ////console.log('Current player:', currentPlayer);
                 calculateScore(currentPlayer, row, col);
                 currentPlayer = currentPlayer === 'r' ? 'y' : 'r';
                 if (check_endgame())
@@ -100,10 +106,10 @@
     function check_endgame() {
         let row = board.length;
         let col = board[0].length;
-        console.log(board);
+        //console.log(board);
         for(let i = 0; i < col; i++) {
             if (board[0][i] === '.') {
-                console.log('not full as', board[0][i]);
+                //console.log('not full as', board[0][i]);
                 return false;
             }
         }
@@ -114,7 +120,7 @@
         } else {
             winner = 'tie'
         }
-        console.log('endgame');
+        //console.log('endgame');
         return true;
     }
 
@@ -135,9 +141,9 @@
         let dru=1
         let dld=1
         let drd=1
-        let moves = [1,2,3]
         let added_score = 0
-        for (let k in moves) {
+        for (let k =1; k<4;k++) {
+            // //console.log("move is: ",k,i,j)
             if (j+k<col){ // horizontal right
                 if (board[i][j+k]===currentPlayer)
                     hr+=1
@@ -213,7 +219,7 @@
         }
     }
     function resetGame() {
-        board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+        board = Array.from({ length: ROWS }, () => Array(COLS).fill('.'));
         currentPlayer = 'r';
         winner = null;
         if (player !== 'r') {

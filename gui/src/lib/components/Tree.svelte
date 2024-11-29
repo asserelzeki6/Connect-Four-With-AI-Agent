@@ -20,7 +20,7 @@
 
     const svg = d3.select(svgContainer)
                   .attr("width", width)
-                  .attr("height", height)
+                  .attr("height", height+100)
                   .append("g")
                   .attr("transform", "translate(50,50)");  // Add padding
 
@@ -52,18 +52,24 @@
       .style("fill", "#4a90e2")
       .style("stroke", "black");
 
-    // Node Labels (Move + Best Move)
+    // Node Labels (Move + Value + Best Move)
     svg.selectAll(".label")
       .data(root.descendants())
       .enter()
       .append("text")
       .attr("class", "label")
-      .attr("x", d => d.x - 10)
-      .attr("y", d => d.y + 5)
-      .text(d => (d.depth === 0 ? `Best: ${d.data.best_move}` : `Move: ${d.data.move}`))
+      .attr("x", d => d.x)
+      .attr("y", d => d.y + 30) // Position below the node
       .style("font-size", "12px")
       .style("fill", "white")
-      .style("text-anchor", "middle");
+      .style("text-anchor", "middle")
+      .html(d => {
+        // Display best move and value
+        const move = `Move: ${d.data.move !== null ? d.data.move : 'Root'}`;
+        const value = `Value: ${d.data.value}`;
+        const bestMove = `Best: ${d.data.best_move !== null ? d.data.best_move : '-'}`;
+        return `${move}<tspan x="${d.x}" dy="1.2em">${value}</tspan><tspan x="${d.x}" dy="1.2em">${bestMove}</tspan>`;
+      });
   }
 </script>
 
@@ -74,11 +80,13 @@
     border: 1px solid #ccc;
     width: 100%;
     height: 100%;
+    background-color: black;
   }
   .node {
     stroke-width: 2px;
   }
   .label {
     font-weight: bold;
+    font-family: Arial, sans-serif;
   }
 </style>
