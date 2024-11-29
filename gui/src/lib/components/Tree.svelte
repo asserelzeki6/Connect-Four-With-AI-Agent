@@ -1,73 +1,84 @@
-<!-- TreeNode.svelte -->
-<!-- <script>
-    import Node from "$lib/Node";
-    import TreeNode from "./TreeNode.svelte";
-    export let node;  // Receive the current node as a prop
+<script>
+  import { onMount } from 'svelte';
+  import * as d3 from 'd3';
 
-  </script>
-   -->
-  <!-- <div class="node">
-    <p><strong>Move:</strong> {node.move} | <strong>Value:</strong> {node.value}</p>
-  
-    {#if node.children.length > 0}
-      <ul>
-        {#each node.children as child}
-          <li><TreeNode node={child} /></li>   Recursively render children -->
-        <!-- {/each}
-      </ul>
-    {/if}
-  </div> --> 
-  
-  <!-- <style>
-    .node { margin-left: 20px; }
-    ul { list-style-type: none; padding-left: 0; }
-  </style>
-   -->
+  export let tree = null;  // Passed from the parent
 
-   <script>
-    export let tree = null;  // This will be passed from the parent component
-    /** @type {number | null} */
-    export let bestMove = null; // Store the best move
-    function renderTree(node) {
-      return `
-        <div style="margin-left: 20px;">
-          <div>Move: ${node.move}</div>
-          <div>Best Move: ${node.best_move}</div>
-          <div>Value: ${node.value}</div>
-          <div>
-            ${node.children.map(renderTree).join('')}
-          </div>
-        </div>
-      `;
+  let svgContainer;
+
+  onMount(() => {
+    if (tree) {
+      drawTree(tree);
     }
-  </script>
-  
-  {#if tree}
-    <div>
-      <h3>Game Tree</h3>
-      <div>
-        <!-- Render the tree recursively -->
-        {@html renderTree(tree)}
-      </div>
-      <h4>Best Move: {bestMove}</h4>
-    </div>
-  {:else}
-    <p>No tree available</p>
-  {/if}
-  
-  
-  <style>
-    div {
-      margin-left: 20px;
-      font-family: Arial, sans-serif;
-    }
-  
-    h3, h4 {
-      font-size: 18px;
-    }
-  
-    div > div {
-      margin-top: 10px;
-    }
-  </style>
-  
+  });
+
+  function drawTree(data) {
+    d3.select(svgContainer).selectAll("*").remove();  // Clear previous content
+
+    const width = 1000;  // Increased width for better spacing
+    const height = 600;
+
+    const svg = d3.select(svgContainer)
+                  .attr("width", width)
+                  .attr("height", height)
+                  .append("g")
+                  .attr("transform", "translate(50,50)");  // Add padding
+
+    const root = d3.hierarchy(data);
+    const treeLayout = d3.tree().size([width - 100, height - 100]);
+    treeLayout(root);
+
+    // Links (Arrows)
+    svg.selectAll(".link")
+      .data(root.links())
+      .enter()
+      .append("path")
+      .attr("class", "link")
+      .attr("d", d3.linkVertical()
+                   .x(d => d.x)
+                   .y(d => d.y))
+      .style("stroke", "#aaa")
+      .style("fill", "none");
+
+    // Nodes (Circles)
+    svg.selectAll(".node")
+      .data(root.descendants())
+      .enter()
+      .append("circle")
+      .attr("class", "node")
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
+      .attr("r", 20)
+      .style("fill", "#4a90e2")
+      .style("stroke", "black");
+
+    // Node Labels (Move + Best Move)
+    svg.selectAll(".label")
+      .data(root.descendants())
+      .enter()
+      .append("text")
+      .attr("class", "label")
+      .attr("x", d => d.x - 10)
+      .attr("y", d => d.y + 5)
+      .text(d => (d.depth === 0 ? `Best: ${d.data.best_move}` : `Move: ${d.data.move}`))
+      .style("font-size", "12px")
+      .style("fill", "white")
+      .style("text-anchor", "middle");
+  }
+</script>
+
+<svg bind:this={svgContainer}></svg>
+
+<style>
+  svg {
+    border: 1px solid #ccc;
+    width: 100%;
+    height: 100%;
+  }
+  .node {
+    stroke-width: 2px;
+  }
+  .label {
+    font-weight: bold;
+  }
+</style>

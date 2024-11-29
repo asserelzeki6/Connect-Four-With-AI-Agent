@@ -53,14 +53,14 @@ def make_move():
     # print("col",len(root.board[0]))
 
     # print("best move is: ", best_move)
-    # print("best value is: ", best_value)
-    # Tree = root.to_dict()
+    print("best value is: ", best_value)
+    Tree = root.to_dict()
     # print("Tree is: ", Tree)
-    # return jsonify(Tree)
+    return jsonify(Tree)
 
     # best_move = 0
-    print("best move is: ", best_move)
-    return jsonify(best_move)
+    # print("best move is: ", best_move)
+    # return jsonify(best_move)
 
 if __name__ == '__main__':
     app.run(debug=True)

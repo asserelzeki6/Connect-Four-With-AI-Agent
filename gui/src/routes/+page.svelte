@@ -5,7 +5,7 @@
     let rows = 6;
     let cols = 7;
     let showTree = false;
-    let maxDepth = 4;
+    let maxDepth = 2;
 
     function startGame() {
         const queryParams = new URLSearchParams({

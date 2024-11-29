@@ -45,14 +45,21 @@
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
-            //console.log('Server response:', result);
+            console.log('Server response:', result);
             // tree = result.data;
-            // bestMove = tree.best_move;
-            bestMove = result;
-            //console.log('Best move:', bestMove);
+            bestMove = result.best_move;
+            tree = result;
+            console.log('Best move:', bestMove);
             if (bestMove !== null) {
                 dropDisc(bestMove);
             }
+            /////////////////////////////
+            // bestMove = result;
+            //console.log('Best move:', bestMove);
+            // if (bestMove !== null) {
+            //     dropDisc(bestMove);
+            // }
+            //////////////////////////////////
             // Tree = new Node(result.data);
             // return Tree.move;
             // return result.data;
@@ -275,7 +282,7 @@
         {/if}
     {/if}
     {#if showTree}
-        <Tree {tree} {bestMove} />  <!-- Display the tree when the showTree flag is true -->
+        <Tree {tree} /> 
     {/if}
 
 </div>
