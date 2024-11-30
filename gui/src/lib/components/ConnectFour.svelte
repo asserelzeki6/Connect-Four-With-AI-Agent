@@ -1,294 +1,328 @@
 <script>
     import { ENDPOINTS } from '../enpoints';
-    import Node from '$lib/Node.js';  // Import the Node class
     import Tree from '$lib/components/Tree.svelte';  // Import the TreeDisplay component
     import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
-    import { on } from 'svelte/events';
+    
     export let player;
     export let algorithm;
     export let rows;
     export let cols;
     export let maxDepth;
     export let tree = null;
-    let player1_score = 0;
-    let player2_score = 0;
     /** @type {number | null} */
     export let bestMove = null;
     let showTree = false;
     
     let board = Array.from({ length: rows }, () => Array(cols).fill('.'));
-    const ROWS = 6;
-    const COLS = 7;
-    let currentPlayer = 'r';
+    let currentPlayer = 'r';  // Default: red (human)
     /** @type {string | null} */
     let winner = null;
-
-    onMount(() => {
-        if (player !== 'r') {
-            AiMove(board, player, algorithm, maxDepth);
-        }});
+    let player1_connectedFours = 0;  // Track connected fours for player 1
+    let player2_connectedFours = 0;  // Track connected fours for player 2
+    let aiPlayer = 'y';  // Default: yellow (AI)
+  
+// Initialization based on player's choice
+onMount(() => {
+    console.log('Game started with:', { player, algorithm, rows, cols, maxDepth });
     
-    async function AiMove(board, player, algorithm, maxDepth) {
-        try {
-            const payload = { 
-                board, 
-                starting_player : player, 
-                algorithm, 
-                maximum_depth : maxDepth 
-            };
-            const response = await fetch(ENDPOINTS.AIResponse, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-            //console.log('Server response:', result);
-            // tree = result.data;
-            bestMove = result.best_move;
-            tree = result;
-            //console.log('Best move:', bestMove);
-            if (bestMove !== null) {
-                dropDisc(bestMove);
-            }
-            /////////////////////////////
-            // bestMove = result;
-            ////console.log('Best move:', bestMove);
-            // if (bestMove !== null) {
-            //     dropDisc(bestMove);
-            // }
-            //////////////////////////////////
-            // Tree = new Node(result.data);
-            // return Tree.move;
-            // return result.data;
-        } catch (error) {
-            console.error('Error sending game data:', error);
-            setTimeout(() => {
-            //console.log('Executed after 2 seconds');
-            }, 100);
-            if (currentPlayer !== player) {
-                AiMove(board, player, algorithm, maxDepth);
+    // If player chooses red ('r'), they start, AI is yellow ('y')
+    if (player === 'r') {
+        currentPlayer = 'r'; // Player starts with red
+        aiPlayer = 'y'; // AI is yellow
+    } 
+    // If player chooses yellow ('y'), AI starts with red
+    else if (player === 'y') {
+        currentPlayer = 'r'; // Player starts with yellow
+        aiPlayer = 'r'; // AI is red
+        AiMove(board, aiPlayer, algorithm, maxDepth);  // AI starts first
+    }
+});
+
+// AI move function based on assigned role (red or yellow)
+async function AiMove(board, aiPlayer, algorithm, maxDepth) {
+    try {
+        const payload = { 
+            board, 
+            starting_player: aiPlayer, 
+            algorithm, 
+            maximum_depth: maxDepth 
+        };
+        const response = await fetch(ENDPOINTS.AIResponse, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        bestMove = result.best_move;
+        tree = result;
+        if (bestMove !== null) dropDiscAI(bestMove);  // Make AI move
+    } catch (error) {
+        console.error('Error sending game data:', error);
+        setTimeout(() => {}, 500);
+        if (currentPlayer !== player) AiMove(board, player, algorithm, maxDepth);
+    }
+}
+
+// AI makes a move based on its assigned color
+function dropDiscAI(col=0) {
+    if (currentPlayer === aiPlayer && winner === null) {
+        for (let row = rows - 1; row >= 0; row--) {
+            if (board[row][col] === '.') {
+                board[row][col] = aiPlayer;  // AI drops the correct colored disc
+                calculateScore(aiPlayer, row, col);
+                if (check_endgame()) return;
+                currentPlayer = (aiPlayer === 'r') ? 'y' : 'r';  // Switch to player
+                break;
             }
         }
     }
-    
-    function toggleTree() {
-        // ////console.log('Show tree');
-        showTree = !showTree;
-    }
+}
 
-    function dropDisc(col=0) {
-        if (winner) return;
-        ////console.log(board);
-        ////console.log('Dropping disc in column:', col);
-        check_endgame();
-        for (let row = ROWS - 1; row >= 0; row--) {
-            if (board[row][col]==='.') {
-                board[row][col] = currentPlayer;
-                // if (checkWinner()) {
-                //     winner = currentPlayer;
-                // } else {
-                ////console.log('Current player:', currentPlayer);
-                calculateScore(currentPlayer, row, col);
-                currentPlayer = currentPlayer === 'r' ? 'y' : 'r';
-                if (check_endgame())
-                    return;
-                if (currentPlayer !== player) {
-                    AiMove(board, player, algorithm, maxDepth);
+// Handle the human player's move
+function dropDiscHuman(col=0) {
+    if(showTree)
+        toggleTree();
+    if (currentPlayer === player && winner === null) {
+        for (let row = rows - 1; row >= 0; row--) {
+            if (board[row][col] === '.') {
+                board[row][col] = player;  // Player drops their colored disc
+                calculateScore(player, row, col);
+                if (check_endgame()) return;
+                currentPlayer = aiPlayer;  // Switch to AI
+                if (currentPlayer === aiPlayer) {
+                    setTimeout(() => { 
+                        AiMove(board, aiPlayer, algorithm, maxDepth); 
+                    }, 500);  // Delay AI move for smoother gameplay
                 }
                 break;
             }
         }
     }
+}
+
 
     function check_endgame() {
-        let row = board.length;
-        let col = board[0].length;
-        //console.log(board);
-        for(let i = 0; i < col; i++) {
-            if (board[0][i] === '.') {
-                //console.log('not full as', board[0][i]);
-                return false;
-            }
+        if (board.every(row => row.every(cell => cell !== '.'))) {
+            winner = player1_connectedFours > player2_connectedFours ? 'player1' :
+                     player1_connectedFours < player2_connectedFours ? 'player2' : 'tie';
+            return true;
         }
-        if (player1_score > player2_score) {
-            winner = 'player1'
-        } else if (player1_score < player2_score) {
-            winner = 'player2'
-        } else {
-            winner = 'tie'
-        }
-        //console.log('endgame');
-        return true;
+        return false;
     }
-
-
+  
     function calculateScore(currentPlayer, i, j) {
-        let row = board.length;
-        let col = board[0].length;
-        // if (winner === 'r') {
-        //     player1_score++;
-        // } else if (winner === 'y') {
-        //     player2_score++;
-        // }
-        let hr=1
-        let hl=1
-        let vu=1
-        let vd=1
-        let dlu=1
-        let dru=1
-        let dld=1
-        let drd=1
-        let added_score = 0
-        for (let k =1; k<4;k++) {
-            // //console.log("move is: ",k,i,j)
-            if (j+k<col){ // horizontal right
-                if (board[i][j+k]===currentPlayer)
-                    hr+=1
-                else
-                    hr=0
-                if (i-k>=0){ // diagonal right up
-                    if (board[i-k][j+k]==currentPlayer)
-                        dru+=1
-                    else
-                        dru=0
-                }
+        const directions = [
+            { dx: 1, dy: 0 },  // Horizontal
+            { dx: 0, dy: 1 },  // Vertical
+            { dx: 1, dy: 1 },  // Diagonal down-right
+            { dx: 1, dy: -1 }, // Diagonal up-right
+        ];
+  
+        let added_score = 0;
+        directions.forEach(({ dx, dy }) => {
+            let count = 1;
+            for (let k = 1; k < 4; k++) {
+                const x = i + dx * k;
+                const y = j + dy * k;
+                if (x >= 0 && x < rows && y >= 0 && y < cols && board[x][y] === currentPlayer) {
+                    count++;
+                } else break;
             }
-            if (i - k >= 0) { // vertical up
-                if (board[i - k][j] === currentPlayer) {
-                    vu++;
-                } else {
-                    vu = 0;
-                }
-                if (j - k >= 0) { // diagonal left up
-                    if (board[i - k][j - k] === currentPlayer) {
-                        dlu++;
-                    } else {
-                        dlu = 0;
-                    }
-                }
+            for (let k = 1; k < 4; k++) {
+                const x = i - dx * k;
+                const y = j - dy * k;
+                if (x >= 0 && x < rows && y >= 0 && y < cols && board[x][y] === currentPlayer) {
+                    count++;
+                } else break;
             }
-
-            if (j - k >= 0) { // horizontal left
-                if (board[i][j - k] === currentPlayer) {
-                    hl++;
-                } else {
-                    hl = 0;
-                }
-                if (i - k >= 0) { // diagonal right down
-                    if (board[i - k][j - k] === currentPlayer) {
-                        drd++;
-                    } else {
-                        drd = 0;
-                    }
-                }
-            }
-
-            if (i + k < row) { // vertical down
-                if (board[i + k][j] === currentPlayer) {
-                    vd++;
-                } else {
-                    vd = 0;
-                }
-                if (j - k >= 0) { // diagonal left down
-                    if (board[i + k][j - k] === currentPlayer) {
-                        dld++;
-                    } else {
-                        dld = 0;
-                    }
-                }
-            }
-        }
-
-        if (hr === 4) added_score += 1;
-        if (vu === 4) added_score += 1;
-        if (dru === 4) added_score += 1;
-        if (dlu === 4) added_score += 1;
-        if (hl === 4) added_score += 1;
-        if (vd === 4) added_score += 1;
-        if (drd === 4) added_score += 1;
-        if (dld === 4) added_score += 1;
+            if (count >= 4) added_score++;
+        });
+  
         if (added_score > 0) {
-            if (currentPlayer === 'r') {
-                player1_score += added_score;
-            } else {
-                player2_score += added_score;
-            }
+            if (currentPlayer === 'r') player1_connectedFours += added_score;
+            else player2_connectedFours += added_score;
         }
     }
+  
     function resetGame() {
-        board = Array.from({ length: ROWS }, () => Array(COLS).fill('.'));
-        currentPlayer = 'r';
+        board = Array.from({ length: rows }, () => Array(cols).fill('.'));
+        currentPlayer = player === 'r' ? 'r' : 'y';  // Player starts based on selection
         winner = null;
-        if (player !== 'r') {
-            AiMove(board, player, algorithm, maxDepth);
-        }
+        player1_connectedFours = 0;
+        player2_connectedFours = 0;
+        if (player === 'y') AiMove(board, 'r', algorithm, maxDepth);  // AI starts if player is yellow
     }
-    export function goBack() {
-        resetGame();
-        // redirect(302,'/');
-        goto('/');
+  
+    function toggleTree() {
+        showTree = !showTree;
     }
 </script>
 
-<style>
-    .board {
-        display: grid;
-        grid-template-columns: repeat(7, 50px);
-        gap: 5px;
-    }
-    .cell {
-        width: 50px;
-        height: 50px;
-        background-color: #4a0ce6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-    .disc {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-    }
-    .r {
-        background-color: red;
-    }
-    .y {
-        background-color: yellow;
-    }
-</style>
-
-<div>
-    <div class="board">
-        {#each board as row, rowIndex}
-            {#each row as cell, colIndex}
-                <div class="cell" role="button" tabindex="0" on:click={() => dropDisc(colIndex)} on:keydown={(e) => e.key === 'Enter' && dropDisc(colIndex)}>
-                    {#if cell !== '.'}
-                        <div class="disc {cell}"></div>
-                    {/if}
-                </div>
+<div class="container">
+    <div class="board-wrapper">
+        <div class="board">
+            {#each board as row, rowIndex}
+                {#each row as cell, colIndex}
+                    <div class="cell" role="button" tabindex="0" 
+                        on:click={() => dropDiscHuman(colIndex)} 
+                        on:keydown={(e) => e.key === 'Enter' && dropDiscHuman(colIndex)}>
+                        {#if cell !== '.'}
+                            <div class="disc {cell}"></div>
+                        {/if}
+                    </div>
+                {/each}
             {/each}
-        {/each}
+        </div>
+        <div class="board-stand"></div>  <!-- Stand beneath the board -->
     </div>
-    <button on:click={resetGame}>Reset Game</button>
-    <button on:click={toggleTree}>Show Tree</button>
-    <button on:click={goBack}>Go back to main menu</button>
-    <div>
-        <p>Player 1 (Red) Score: {player1_score}</p>
-        <p>Player 2 (Yellow) Score: {player2_score}</p>
+
+    <div class="scoreboard">
+        <p class="player1">Player 1 (Red) Connected Fours: {player1_connectedFours}</p>
+        <p class="player2">Player 2 (Yellow) Connected Fours: {player2_connectedFours}</p>
     </div>
+    
+
     {#if winner}
-        {#if winner === 'tie'}
-            <h2>It's a tie!</h2>
-        {:else}
-            <h2>{winner} wins!</h2>
-        {/if}
-    {/if}
-    {#if showTree}
-        <Tree {tree} /> 
+        <h2>{#if winner === 'tie'}It's a tie!{:else}{winner} wins!{/if}</h2>
     {/if}
 
+    <div class="buttons">
+        <button on:click={resetGame}>Reset Game</button>
+        <button on:click={toggleTree}>
+            {showTree ? 'Hide Tree' : 'Show Tree'}
+        </button>
+    </div>
+    
+    <div>
+        {#if showTree}
+            <Tree {tree} />
+        {/if}
+    </div>
 </div>
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.board-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(7, 70px);
+    gap: 10px;
+    background-color: #0044cc;  /* Blue board background */
+    padding: 10px;
+    border-radius: 10px;
+    width: max-content; /* Ensures width adjusts based on grid size */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);  /* Add shadow to create a 3D effect */
+    z-index: 1;
+}
+
+.board-stand {
+    width: 100%;
+    height: 50px;
+    background-color: #333;  /* Dark brown or black color for the stand */
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);  /* Stand shadow for 3D look */
+}
+
+.cell {
+    width: 70px;
+    height: 70px;
+    background-color: #acd3d8;  /* Dark blue cells for contrast */
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cell:focus {
+    outline: none;
+}
+
+.disc {
+    width: 60px;
+    height: 60px;
+    background-color: transparent;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.disc.r {
+    background-color: red;
+}
+
+.disc.y {
+    background-color: yellow;
+}
+
+/* Update scoreboard styles */
+.scoreboard {
+    font-size: 1.5em;  /* Increase font size */
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;  /* Change font to a clean, modern style */
+    margin-top: 20px;  /* Move text down */
+}
+
+.scoreboard p {
+    margin: 5px 0;
+}
+
+/* Player 1 (Red) score */
+.scoreboard .player1 {
+    color: red;  /* Set color to red for Player 1 */
+}
+
+/* Player 2 (Yellow) score */
+.scoreboard .player2 {
+    color: yellow;  /* Set color to yellow for Player 2 */
+}
+
+
+/* Update the buttons */
+.buttons button {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 1.2em;  /* Increase font size */
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;  /* Clean font for buttons */
+}
+
+.buttons button:hover {
+    background-color: #005a8b;
+}
+
+.buttons button:focus {
+    outline: none;
+}
+
+/* Header text for the winner announcement */
+h2 {
+    font-size: 2em;  /* Larger font size for winner text */
+    color: #f39c12;  /* Gold color for winner announcement */
+    font-family: 'Arial', sans-serif;
+    margin-top: 20px;  /* Add space above the text */
+    text-align: center;
+}
+
+</style>
