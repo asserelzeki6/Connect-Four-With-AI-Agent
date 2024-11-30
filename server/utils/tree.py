@@ -4,8 +4,8 @@ import os
 # Add the project's root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.Node import Node 
-from utils.scoring import *
+from server.utils.Node import Node
+from server.utils.scoring import *
 import copy
 
 empty = '.'
@@ -18,7 +18,7 @@ def generate_tree(root:Node, starting_player, player1, player2, max_height):
 
 def recursive_generation_tree(root:Node, player, max_height,player1,player2):
     if max_height==0 : 
-        root.set_value(board_score(root.board,player1,player2)) #### CHANGE HERE THE HEURISTIC 
+        root.set_value(heuristic(root.board,player1,player2)) #### CHANGE HERE THE HEURISTIC
         return
     generate_children(root,player)
     if player == player1:
