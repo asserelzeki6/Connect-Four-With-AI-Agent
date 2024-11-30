@@ -160,7 +160,7 @@ function dropDiscHuman(col=0) {
 
 <div class="container">
     <div class="board-wrapper">
-        <div class="board">
+        <div class="board" style="grid-template-columns: repeat({board[0].length}, 70px);">
             {#each board as row, rowIndex}
                 {#each row as cell, colIndex}
                     <div class="cell" role="button" tabindex="0" 
@@ -218,7 +218,7 @@ function dropDiscHuman(col=0) {
 
 .board {
     display: grid;
-    grid-template-columns: repeat(7, 70px);
+    /* grid-template-columns: repeat(cols, 70px); */
     gap: 10px;
     background-color: #0044cc;  /* Blue board background */
     padding: 10px;
