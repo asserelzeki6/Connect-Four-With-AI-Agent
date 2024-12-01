@@ -38,7 +38,7 @@ def make_move():
     best_value = None
     if algorithm == 'minimax':
         root, best_move, best_value=minimax_without_pruning(board, starting_player, maximumu_depth)
-    elif algorithm == 'alphabeta':
+    elif algorithm == 'alphaBeta':
         root, best_move, best_value=minimax_with_pruning(board, starting_player, maximumu_depth)
     elif algorithm == 'expected':
         root, best_move, best_value=expected_minimax(board, starting_player, maximumu_depth)

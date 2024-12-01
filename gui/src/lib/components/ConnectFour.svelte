@@ -9,6 +9,7 @@
     export let cols;
     export let maxDepth;
     export let tree = null;
+    let firstTime = true;
     /** @type {number | null} */
     export let bestMove = null;
     let showTree = false;
@@ -58,8 +59,14 @@ async function AiMove(board, aiPlayer, algorithm, maxDepth) {
         if (bestMove !== null) dropDiscAI(bestMove);  // Make AI move
     } catch (error) {
         console.error('Error sending game data:', error);
-        setTimeout(() => {}, 500);
-        if (currentPlayer !== player) AiMove(board, player, algorithm, maxDepth);
+        if(firstTime){
+            setTimeout(() => {}, 500);
+            if (currentPlayer !== player) AiMove(board, player, algorithm, maxDepth);
+            firstTime = false;
+        }else{
+            firstTime = true;
+            alert('Error connecting to the server. Please try again later. Or try to restart the game.');
+        }
     }
 }
 
