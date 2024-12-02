@@ -4,191 +4,84 @@ import os
 # Add the project's root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.Node import Node
-from utils.tree import generate_tree
+import copy
+from  utils.scoring import heuristic, print_board
+from  utils.Node import Node
+from  utils.tree import get_children, print_tree, generate_children
 
-player1='r'
-player2='y'
+def minimize(current_node, depth, max_depth):
+    state = current_node.board
+    best_child = None
+    if depth == max_depth:
+        current_node.utility = heuristic(state, 'r', 'y')
+        return current_node, None
 
-##########################MINIMAX WITHOUT PRUNING#############################
-def minimax_without_pruning(board, starting_player, max_height):
-    root = Node(board)
-    generate_tree(root, starting_player, player1, player2, max_height)
+    min_utility = float('inf')
 
-    best_state:Node = None
-    best_value = 0
+    for child in generate_children(state, 'y', depth+1):
+        _, _ = maximize(child, depth + 1, max_depth)
+        current_node.add_child(child)
 
-    if starting_player == player1:
-        best_state, best_value = max_without_pruning(root)
+        if child.utility < min_utility:
+            min_utility = child.utility
+            best_child = child
+
+    if best_child is None:
+        current_node.utility = heuristic(state, 'r', 'y')
+        return current_node, None
+    
+    current_node.best_move = best_child.move
+    current_node.utility = min_utility
+    return current_node, min_utility
+
+
+def maximize(current_node, depth, max_depth):
+    state = current_node.board
+    best_child = None
+    if depth == max_depth:
+        current_node.utility = heuristic(state, 'r', 'y')
+        return current_node, None
+
+    max_utility = float('-inf')
+
+    for child in generate_children(state, 'r', depth+1):
+        _, _ = minimize(child, depth + 1, max_depth)
+        current_node.add_child(child)
+
+        if child.utility > max_utility:
+            max_utility = child.utility
+            best_child = child
+
+    if best_child is None:
+        current_node.utility = heuristic(state, 'r', 'y')
+        return current_node, None
+
+    current_node.best_move = best_child.move
+    current_node.utility = max_utility
+    return current_node, max_utility
+
+
+def minimax_decision(state, aiPlayer,max_depth):
+    root_node = Node(state, aiPlayer, 0)
+    if aiPlayer == 'r':
+        root_node, _ = maximize(root_node, 0, max_depth)
     else:
-        best_state, best_value = min_without_pruning(root)
+        root_node, _ = minimize(root_node, 0, max_depth)
+    root_node.isRoot = True
+    return root_node
 
-    return root, best_state.move, best_value
 
-def max_without_pruning(state:Node):
-    if state.value != None:
-        return state, state.value
-    
-    max_child = None
-    max_value = float('-inf')
-    best_move = None
 
-    for child in state.children:
-        _, value = min_without_pruning(child)
-        if value > max_value:
-            best_move, max_child, max_value = child.move , child, value
-    
-    state.set_best_move(best_move)
-    state.set_value(max_value)
-    return max_child, max_value
+# if __name__ == "__main__":
+#     boardd = [
+#         ['.', '.', '.', '.', '.', '.', '.'],
+#         ['.', '.', '.', '.', 'r', '.', '.'],
+#         ['.', '.', 'y', 'r', 'r', '.', '.'],
+#         ['.', '.', 'r', 'y', 'y', '.', '.'],
+#         ['y', 'r', 'r', 'r', 'y', 'y', 'y'],
+#         ['r', 'r', 'r', 'r', 'y', 'y', 'y']
+#     ]
+#     root, move = minimax_decision(boardd)
+#     print_board(move.board)
+#     print_tree(root)
 
-def min_without_pruning(state:Node):
-    if state.value != None:
-        return state, state.value
-    
-    min_child = None
-    min_value = float('inf')
-    best_move = None
-
-    for child in state.children:
-        _, value = max_without_pruning(child)
-        if value < min_value:
-            best_move, min_child, min_value = child.move, child, value
-
-    state.set_best_move(best_move)
-    state.set_value(min_value)
-    return min_child, min_value
-    
-#########################MINIMAX WITH PRUNING#################################
-def minimax_with_pruning(board, starting_player, max_height):
-    root = Node(board)
-    generate_tree(root, starting_player, player1, player2, max_height)
-
-    best_state:Node = None
-    best_value = 0
-
-    if starting_player == player1:
-        best_state, best_value = max_with_pruning(root, float('-inf'), float('inf'))
-    else:
-        best_state, best_value = min_with_pruning(root, float('-inf'), float('inf'))
-
-    return root, best_state.move, best_value
-
-def max_with_pruning(state:Node, alpha, beta):
-    if state.value != None:
-        return state,state.value
-    
-    max_child = None
-    max_value = float('-inf')
-    best_move = None
-
-    for child in state.children:
-        _, value = min_with_pruning(child, alpha, beta) 
-        if value > max_value:
-            best_move, max_child, max_value = child.move, child, value
-        if max_value >= beta:
-            break
-        if max_value > alpha:
-            alpha = max_value
-
-    state.set_best_move(best_move)
-    state.set_value(max_value)
-    return max_child, max_value
-
-def min_with_pruning(state:Node, alpha, beta):
-    if state.value != None:
-        return state, state.value
-    
-    min_child=None
-    min_value=float('inf')    
-    best_move = None
-
-    for child in state.children:
-        _, value = max_with_pruning(child, alpha, beta)
-        if value < min_value:
-            best_move, min_child, min_value = child.move, child, value
-        if min_value <= alpha:
-            break
-        if min_value < beta:
-            beta = min_value
-
-    state.set_best_move(best_move)
-    state.set_value(min_value)
-    return min_child, min_value
-    
-###########################EXPECTED MINIMAX####################################
-def expected_minimax(board, starting_player, max_height):
-    root = Node(board)
-    generate_tree(root, starting_player, player1, player2, max_height)
-
-    best_state:Node = None
-    best_value = 0
-
-    if starting_player == player1:
-        best_state, best_value = expected_max(root)
-    else:
-        best_state, best_value = expected_min(root)
-
-    return root, best_state.move, best_value
-
-def expected_max(state:Node):
-    if state.value != None:
-        return state, state.value
-    
-    n = len(state.children)
-    max_child_index=0
-    values=[]
-    max_child = None
-    max_value = float('-inf')
-    best_move = None
-
-    for i in range(n):
-        _, value = expected_min(state.children[i])
-        values.append(value)
-        if value > max_value:
-            best_move, max_child_index, max_child, max_value = state.children[i].move, i, state.children[i], value
-
-    expected_value = 0.6*max_value
-    if max_child_index-1 >= 0:
-        expected_value+=0.2*values[max_child_index-1]
-    else:
-        expected_value+=0.2*max_value
-    if max_child_index+1 < n:
-         expected_value+=0.2*values[max_child_index+1]
-    else:
-        expected_value+=0.2*max_value
-
-    state.set_best_move(best_move)
-    state.set_value(expected_value)
-    return max_child, expected_value
-
-def expected_min(state:Node):
-    if state.value != None:
-        return state, state.value
-    
-    n = len(state.children)
-    min_child_index=0
-    values=[]
-    min_child = None
-    min_value = float('inf')
-    best_move = None
-
-    for i in range(n):
-        _, value = expected_max(state.children[i])
-        values.append(value)
-        if value < min_value:
-            best_move, min_child_index, min_child, min_value = state.children[i].move, i, state.children[i], value
-
-    expected_value = 0.6*min_value
-    if min_child_index-1 >= 0:
-        expected_value+=0.2*values[min_child_index-1]
-    else:
-        expected_value+=0.2*min_value
-    if min_child_index+1 < n:
-         expected_value+=0.2*values[min_child_index+1]
-    else:
-        expected_value+=0.2*min_value
-
-    state.set_best_move(best_move)
-    state.set_value(expected_value)
-    return min_child, expected_value

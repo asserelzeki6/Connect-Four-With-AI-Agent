@@ -5,8 +5,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from  utils.scoring import heuristic, print_board
-from  utils.Nodev2 import Nodev2
-from  utils.treev2 import generate_children, print_tree, get_expected_children
+from  utils.Node import Node
+from  utils.tree import generate_children, print_tree, get_expected_children
 
 def minimize(current_node, depth, max_depth):
     if depth >= max_depth:
@@ -53,11 +53,11 @@ def maximize(current_node, depth, max_depth):
 
 def maxExpectedUtility(state, depth, player, children):
     best_expected_child = None
-    maximum_expected_utility = float("inf")
+    maximum_expected_utility = float("-inf")
     for child in get_expected_children(state.board, player, children, depth):
         if child.utility > maximum_expected_utility:
             maximum_expected_utility = child.utility
-            best_move = child
+            best_expected_child = child
         state.children.append(child)
     
     return best_expected_child, maximum_expected_utility
@@ -76,7 +76,7 @@ def minExpectedUtility(state, depth, player, children):
 
 
 def expected_decision(state, aiPlayer,max_depth):
-    root_node = Nodev2(state, aiPlayer, 0)
+    root_node = Node(state, aiPlayer, 0)
     if aiPlayer == 'r':
         _, _ = maximize(root_node, 0, max_depth)
     else:

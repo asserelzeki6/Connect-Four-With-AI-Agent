@@ -197,7 +197,7 @@ function dropDiscHuman(col=0) {
   
     function resetGame() {
         board = Array.from({ length: rows }, () => Array(cols).fill('.'));
-        currentPlayer = player === 'r' ? 'r' : 'y';  // Player starts based on selection
+        currentPlayer = 'r';  // Player starts based on selection
         winner = null;
         player1_connectedFours = 0;
         player2_connectedFours = 0;

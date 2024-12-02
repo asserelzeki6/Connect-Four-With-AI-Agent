@@ -17,15 +17,15 @@
     // Set dimensions based on screen size
     const maxDepth = d3.max(d3.hierarchy(data).descendants(), d => d.depth);
     const numNodesAtMaxDepth = Math.pow(7, maxDepth - 1);  // Number of nodes at maximum depth
-    const width = numNodesAtMaxDepth*80 ;
-    const height = window.innerHeight * 0.8;
+    const width = numNodesAtMaxDepth*600 ;
+    const height = maxDepth * 400;
 
     const svg = d3.select(svgContainer)
                   .attr("width", width)
                   .attr("height", height)
                   .attr("viewBox", `0 0 ${width} ${height}`)
                   .append("g")
-                  .attr("transform", `translate(${width / 10}, 50)`);
+                  .attr("transform", `translate(0, 50)`);
 
     // Calculate maximum depth of the tree
     const horizontalSpacing = width / (Math.log2(numNodesAtMaxDepth) * 7);  // Logarithmic scaling
@@ -108,18 +108,19 @@
     .style("text-anchor", "middle")
     .selectAll("tspan")  // Add tspan for vertical alignment
     .data(d => {
-      const { move, utility, best_move } = d.data;
+      const { move, utility, best_move, depth } = d.data;
       const parts = [
         move !== null ? `M: ${move}` : null,
         utility !== null ? `V: ${utility}` : null,
-        best_move !== null ? `B: ${best_move}` : null
+        best_move !== null ? `B: ${best_move}` : null,
+        depth !== null ? `D: ${depth}` : null
       ].filter(Boolean);  // Remove null values
       return parts;
     })
     .enter()
     .append("tspan")
     .attr("x", 0)
-    .attr("dy", (d, i) => i * 12)  // Vertical spacing between lines
+    .attr("dy", (d, i) =>  (i === 0 ? -10 : i+10))  // Vertical spacing between lines
     .text(d => d);
 
   }
@@ -131,12 +132,12 @@
 
 <style>
   .svg-container {
-    width: 100%;
+    width: 100vh;
     max-width: 100%;
     height: 100vh;
     overflow-x: auto;
     overflow-y: auto;
-    position: relative;
+    position: center;
 
      /* white-space: nowrap;   */
     /* border: 1px solid #ccc; */

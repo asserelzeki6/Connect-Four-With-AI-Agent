@@ -4,8 +4,6 @@ import os
 # Add the project's root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.Node import Node
-
 def board_score(board, player1, player2):
     score = 0
     row = len(board)

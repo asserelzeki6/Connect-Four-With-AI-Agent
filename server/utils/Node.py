@@ -1,42 +1,40 @@
-class Node:
-    def __init__(self, board):
-        self.board = board  # This should be the actual game board (a list or similar)
-        self.children = []
-        self.value = None
-        self.move = None
-        self.best_move = None
+import copy
 
-    def addChild(self, board, move):
-        child = Node(board)  # Create a new node with a proper board
-        child.move=move
+class Node:
+    def __init__(self, board, player, depth):
+        # Store the board state for this node
+
+        self.board = copy.deepcopy(board)  # Ensure the board is not shared among nodes
+        # print_board(board)
+        # print()
+        self.player = player
+        self.depth = depth
+        self.children = []
+        self.move = None
+        self.utility = None
+        self.best_move = None
+        self.isRoot = False
+
+    def add_child(self, child):
         self.children.append(child)
 
-    def set_value(self, value):
-        self.value = value
-
-    def set_best_move(self, best_move):
-        self.best_move = best_move
-
-    def get_board(self):
-        return self.board
-
     def to_dict(self):
+        if self.isRoot:
+            return {
+                'type': 'Root',
+                'player': self.player,
+                'depth': self.depth,
+                'children': [child.to_dict() for child in self.children],
+                'move': self.move,
+                'best_move': self.best_move, 
+                'utility': self.utility
+            }
         return {
+            'type': 'Node',
+            'player': self.player,
+            'depth': self.depth,
+            'children': [child.to_dict() for child in self.children],
             'move': self.move,
-            'best_move': self.best_move,
-            'value': self.value,
-            'children': [child.to_dict() for child in self.children]
+            'best_move': self.best_move, 
+            'utility': self.utility
         }
-    def __str__(self):
-        return f"Node(board={self.board})"
-
-# board_data = [['', '', '', '', '', '', ''],
-#               ['', '', '', '', '', '', ''],
-#               ['', '', '', '', '', '', ''],
-#               ['', '', '', '', '', '', ''],
-#               ['', '', '', '', '', '', ''],
-#               ['', '', '', '', '', '', '']]
-
-# # Create a Node with the board data
-# parent = Node(board_data)
-# print("Parent board is: ", parent.board)  # This will now print the actual board

@@ -39,6 +39,7 @@ class Chance:
         return {
             'type': 'Chance',
             'move': self.move,
+            'depth': self.depth,
             'utility': self.utility,
             'best_move': None,
             'children': [child.to_dict() for child in self.children]
