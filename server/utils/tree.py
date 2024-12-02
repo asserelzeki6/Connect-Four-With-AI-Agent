@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.Node import Node
 from utils.scoring import *
+from utils.Chance import Chance
 import copy
 
 empty = '.'
@@ -48,6 +49,29 @@ def generate_children(parent:Node, player):
         # else:
             # print(f"Column {j} is full, skipping this move.")
 
+
+def get_expected_children(board, player, children, depth):
+    col = len(board[0])
+    expected_children = []
+    for j in range(col):
+        child = None
+        prev_child = None
+        next_child = None
+        for c in children:
+            if c.move == j:
+                child = c
+            if c.move == j-1:
+                prev_child = c
+            if c.move == j+1:
+                next_child = c
+        if child is not None:
+            chance = Chance(j,player,depth)
+            chance.add_children(child,prev_child,next_child)
+            expected_children.append(chance)
+    return expected_children
+
+            
+
 def playable_row(board, j):
     row = len(board)
     for i in range(row-1,-1,-1):
@@ -55,5 +79,8 @@ def playable_row(board, j):
             return i
     return -1
 
-def make_tree_printable(root:Node):
-    pass
+def print_tree(node, depth=0):
+    prefix = "    " * depth
+    print(f"{prefix}Depth: {node.depth}, Player: {node.player}, Utility: {node.utility}")
+    for child in node.children:
+        print_tree(child, depth + 1)

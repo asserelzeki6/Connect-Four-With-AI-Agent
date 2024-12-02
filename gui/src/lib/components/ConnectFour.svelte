@@ -44,9 +44,9 @@ async function AiMove(board, aiPlayer, algorithm, maxDepth) {
     try {
         const payload = { 
             board, 
-            starting_player: aiPlayer, 
+            aiPlayer, 
             algorithm, 
-            maximum_depth: maxDepth 
+            maxDepth 
         };
         const response = await fetch(ENDPOINTS.AIResponse, {
             method: 'POST',
@@ -73,6 +73,9 @@ async function AiMove(board, aiPlayer, algorithm, maxDepth) {
 // AI makes a move based on its assigned color
 function dropDiscAI(col=0) {
     if (currentPlayer === aiPlayer && winner === null) {
+        if (algorithm === 'expected') {
+            col = stochastic_board(col);
+        }
         for (let row = rows - 1; row >= 0; row--) {
             if (board[row][col] === '.') {
                 board[row][col] = aiPlayer;  // AI drops the correct colored disc
@@ -85,11 +88,52 @@ function dropDiscAI(col=0) {
     }
 }
 
+function stochastic_board(col) {
+    console.log('Stochastic board');
+    // Determine valid adjacent columns
+    const leftCol = col - 1 >= 0 ? col - 1 : null;
+    const rightCol = col + 1 < cols ? col + 1 : null;
+
+    // Check if the adjacent columns are available (not full)
+    const isLeftValid = leftCol !== null && board[0][leftCol] === '.';
+    const isRightValid = rightCol !== null && board[0][rightCol] === '.';
+
+    // Adjust probabilities based on valid columns
+    let probabilities = [
+        { col, probability: 0.6 },  // 60% chance for the selected column
+    ];
+
+    if (isLeftValid) probabilities.push({ col: leftCol, probability: 0.2 });  // 20% for left column
+    if (isRightValid) probabilities.push({ col: rightCol, probability: 0.2 });  // 20% for right column
+
+    // Normalize probabilities if left/right columns are invalid
+    const totalProbability = probabilities.reduce((sum, p) => sum + p.probability, 0);
+    probabilities.forEach(p => p.probability /= totalProbability);  // Normalize probabilities to sum to 1
+
+    // Randomly select one of the valid columns based on their probabilities
+    let randomValue = Math.random();
+    let cumulativeProbability = 0;
+
+    for (const { col: targetCol, probability } of probabilities) {
+        cumulativeProbability += probability;
+        if (randomValue <= cumulativeProbability) {
+            return targetCol;  // Return the selected column
+        }
+    }
+
+    // Fallback in case no column is selected (should not happen due to probability sum normalization)
+    return col;
+}
+
+
 // Handle the human player's move
 function dropDiscHuman(col=0) {
     if(showTree)
         toggleTree();
     if (currentPlayer === player && winner === null) {
+        if (algorithm === 'expected') {
+            col = stochastic_board(col);
+        }
         for (let row = rows - 1; row >= 0; row--) {
             if (board[row][col] === '.') {
                 board[row][col] = player;  // Player drops their colored disc

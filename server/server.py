@@ -1,8 +1,10 @@
 # app.py
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from utils.minimax import minimax_without_pruning , minimax_with_pruning, expected_minimax
-from utils.Node import Node
+# from utils.minimax import minimax_without_pruning , minimax_with_pruning, expected_minimax
+from utils.minimaxv2 import minimax_decision
+from utils.expectedv2 import expected_decision
+from utils.alphabetav2 import alphabeta_decision
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
@@ -23,25 +25,28 @@ def make_move():
     # Extract necessary data (e.g., board state, player move)
     board = data['board']
     algorithm = data['algorithm']  # 'minimax', 'alphabeta', 'expected'
-    maximumu_depth = data['maximum_depth']
-    starting_player = data['starting_player']
+    maximumu_depth = data['maxDepth']
+    aiPlayer = data['aiPlayer']
     # Call your AI function here (placeholder response for now)
     print("board is: ")
     for i in board:
         print(i)
     print("algorithm is: ", algorithm)
-    print("maximumu_depth is: ", maximumu_depth)
-    print("starting_player is: ", starting_player)
+    print("maximumu depth is: ", maximumu_depth)
+    print("ai Player is: ", aiPlayer)
     best_move = None 
     Tree = None
     root = None
     best_value = None
     if algorithm == 'minimax':
-        root, best_move, best_value=minimax_without_pruning(board, starting_player, maximumu_depth)
+        # root, best_move, best_value=minimax_without_pruning(board, starting_player, maximumu_depth)
+        root=minimax_decision(board, aiPlayer, maximumu_depth)
     elif algorithm == 'alphaBeta':
-        root, best_move, best_value=minimax_with_pruning(board, starting_player, maximumu_depth)
+        # root, best_move, best_value=minimax_with_pruning(board, starting_player, maximumu_depth)
+        root=alphabeta_decision(board, aiPlayer, maximumu_depth)
     elif algorithm == 'expected':
-        root, best_move, best_value=expected_minimax(board, starting_player, maximumu_depth)
+        # root, best_move, best_value=expected_minimax(board, starting_player, maximumu_depth)
+        root=expected_decision(board, aiPlayer, maximumu_depth)
     else:
         print("unsupported algorithm")
         return
@@ -52,8 +57,7 @@ def make_move():
     # print("row",len(root.board))
     # print("col",len(root.board[0]))
 
-    # print("best move is: ", best_move)
-    print("best value is: ", best_value)
+    print("best move is: ", root.best_move)
     Tree = root.to_dict()
     # print("Tree is: ", Tree)
     return jsonify(Tree)
