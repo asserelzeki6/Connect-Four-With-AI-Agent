@@ -111,7 +111,7 @@
       const { move, utility, best_move, depth } = d.data;
       const parts = [
         move !== null ? `M: ${move}` : null,
-        utility !== null ? `V: ${utility}` : null,
+        utility !== null ? `V: ${utility.toFixed(2)}` : null,
         best_move !== null ? `B: ${best_move}` : null,
         depth !== null ? `D: ${depth}` : null
       ].filter(Boolean);  // Remove null values

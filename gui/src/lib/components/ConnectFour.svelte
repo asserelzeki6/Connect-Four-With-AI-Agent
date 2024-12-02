@@ -370,7 +370,7 @@ function dropDiscHuman(col=0) {
 /* Header text for the winner announcement */
 h2 {
     font-size: 2em;  /* Larger font size for winner text */
-    color: #f39c12;  /* Gold color for winner announcement */
+    color: #00ff99;  /* Gold color for winner announcement */
     font-family: 'Arial', sans-serif;
     margin-top: 20px;  /* Add space above the text */
     text-align: center;
