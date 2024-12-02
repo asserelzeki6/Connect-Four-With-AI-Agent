@@ -4,50 +4,66 @@ import os
 # Add the project's root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.Node import Node 
-from utils.scoring import *
+from utils.Chance import Chance
+from utils.Node import Node
 import copy
 
-empty = '.'
+def get_children(board, player):
+    col = len(board[0])
+    children = []
+    for j in range(col):
+        r = playable_row(board, j)
+        if r != -1:
+            new_board = copy.deepcopy(board)
+            new_board[r][j] = player
+            children.append(new_board)
+    return children
 
-def generate_tree(board, starting_player, player1, player2, max_height):
-    root = Node(board)
-    recursive_generation_tree(root, starting_player, max_height,player1, player2)
-    return root
+def get_expected_children(board, player, children, depth):
+    col = len(board[0])
+    expected_children = []
+    for j in range(col):
+        child = None
+        prev_child = None
+        next_child = None
+        for c in children:
+            if c.move == j:
+                child = c
+            if c.move == j-1:
+                prev_child = c
+            if c.move == j+1:
+                next_child = c
+        if child is not None:
+            chance = Chance(j,player,depth)
+            chance.add_children(child,prev_child,next_child)
+            chance.calculate_utility()
+            expected_children.append(chance)
+    return expected_children
 
-
-def recursive_generation_tree(root:Node, player, max_height,player1,player2):
-    if max_height==0 : 
-        root.set_value(board_score(root.board,player1,player2)) #### CHANGE HERE THE HEURISTIC 
-        return
-
-    generate_children(root,player)
-    if player == player1:
-        player=player2
-    else:
-        player=player1
-    for child in root.children:
-        recursive_generation_tree(child,player,max_height-1,player1,player2)
-    if len(root.children) == 0:
-        root.set_value(board_score(root.board,player1,player2))
-
-def generate_children(parent:Node, player):
-    board=parent.board
+def generate_children(board, player, depth):
     col=len(board[0])
+    children = []
     for j in range(col):
         r = playable_row(board, j)
         if r != -1:
             new_board = copy.deepcopy(board)
             new_board[r][j]=player
             move = j
-            parent.addChild(new_board, move)
+            current_node = Node(new_board, player, depth)
+            current_node.move = move
+            children.append(current_node)
+    return children
 
 def playable_row(board, j):
     row = len(board)
-    for i in range(row-1,-1,-1):
-        if board[i][j] == empty:
+    for i in range(row - 1, -1, -1):
+        if board[i][j] == '.':
             return i
     return -1
 
-def make_tree_printable(root:Node):
-    pass
+
+def print_tree(node, depth=0):
+    prefix = "    " * depth
+    print(f"{prefix}Depth: {node.depth}, Player: {node.player}, Utility: {node.utility}")
+    for child in node.children:
+        print_tree(child, depth + 1)

@@ -4,12 +4,12 @@
 	--font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
 		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Fira Mono', monospace;
-	--color-bg-0: rgb(202, 216, 228);
-	--color-bg-1: hsl(209, 36%, 86%);
-	--color-bg-2: hsl(224, 44%, 95%);
-	--color-theme-1: #ff3e00;
-	--color-theme-2: #4075a6;
-	--color-text: rgba(0, 0, 0, 0.7);
+	--color-bg-0: rgb(0, 39, 73);  /* Deep Blue Background */
+	--color-bg-1: #163653;  /* Red Accent Color */
+	--color-bg-2: #1f7299;  /* Yellow Accent Color */
+	--color-theme-1: #273d5e;  /* Yellow for buttons, highlights */
+	--color-theme-2: #4075a6;  /* Blue for secondary accents */
+	--color-text: rgba(255, 255, 255, 0.85);  /* White text */
 	--column-width: 42rem;
 	--column-margin-top: 4rem;
 	font-family: var(--font-body);
@@ -20,7 +20,7 @@ body {
 	min-height: 100vh;
 	margin: 0;
 	background-attachment: fixed;
-	background-color: var(--color-bg-1);
+	background-color: var(--color-bg-1);  /* Set red as primary background */
 	background-size: 100vw 100vh;
 	background-image: radial-gradient(
 			50% 50% at 50% 50%,
@@ -41,7 +41,7 @@ p {
 }
 
 a {
-	color: var(--color-theme-1);
+	color: var(--color-theme-1);  /* Yellow links */
 	text-decoration: none;
 }
 
@@ -50,12 +50,14 @@ a:hover {
 }
 
 h1 {
-	font-size: 2rem;
+	font-size: 2.4rem;
 	text-align: center;
+	color: var(--color-bg-2);  /* Yellow for the header */
 }
 
 h2 {
-	font-size: 1rem;
+	font-size: 1.2rem;
+	color: var(--color-text);
 }
 
 pre {
@@ -88,9 +90,23 @@ button:focus:not(:focus-visible) {
 	outline: none;
 }
 
+button {
+	background-color: var(--color-theme-1);  /* Yellow buttons */
+	color: var(--color-bg-0);  /* Dark blue text */
+	border: none;
+	border-radius: 5px;
+	padding: 0.75rem;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+button:hover {
+	background-color: var(--color-bg-2);  /* Hover to yellow */
+}
+
 @media (min-width: 720px) {
 	h1 {
-		font-size: 2.4rem;
+		font-size: 2.8rem;
 	}
 }
 
