@@ -5,6 +5,8 @@ from flask_cors import CORS
 from utils.minimax import minimax_decision
 from utils.expected import expected_decision
 from utils.alphabeta import alphabeta_decision
+import time
+
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
@@ -36,6 +38,7 @@ def make_move():
     Tree = None
     root = None
     best_value = None
+    start_time = time.time()
     if algorithm == 'minimax':
         root=minimax_decision(board, aiPlayer, maximumu_depth)
     elif algorithm == 'alphaBeta':
@@ -45,6 +48,8 @@ def make_move():
     else:
         print("unsupported algorithm")
         return
+    end_time = time.time()
+    print("time taken is: ", end_time-start_time)
     
 
     print("best move is: ", root.best_move)
