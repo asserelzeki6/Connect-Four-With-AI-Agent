@@ -2,9 +2,9 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 # from utils.minimax import minimax_without_pruning , minimax_with_pruning, expected_minimax
-from utils.minimax import minimax_decision
-from utils.expected import expected_decision
-from utils.alphabeta import alphabeta_decision
+from server.utils.minimax import minimax_decision
+from server.utils.expected import expected_decision
+from server.utils.alphabeta import alphabeta_decision
 import time
 
 
@@ -40,11 +40,11 @@ def make_move():
     best_value = None
     start_time = time.time()
     if algorithm == 'minimax':
-        root=minimax_decision(board, aiPlayer, maximumu_depth)
+        root, child=minimax_decision(board, aiPlayer, maximumu_depth)
     elif algorithm == 'alphaBeta':
-        root=alphabeta_decision(board, aiPlayer, maximumu_depth)
+        root, child = alphabeta_decision(board, aiPlayer, maximumu_depth)
     elif algorithm == 'expected':
-        root=expected_decision(board, aiPlayer, maximumu_depth)
+        root, child = expected_decision(board, aiPlayer, maximumu_depth)
     else:
         print("unsupported algorithm")
         return

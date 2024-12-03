@@ -4,9 +4,9 @@ import os
 # Add the project's root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from  utils.scoring import heuristic, print_board
-from  utils.Node import Node
-from  utils.tree import generate_children, print_tree, get_expected_children
+from  server.utils.scoring import heuristic, print_board
+from  server.utils.Node import Node
+from  server.utils.tree import generate_children, print_tree, get_expected_children
 
 def minimize(current_node, depth, max_depth):
     if depth >= max_depth:

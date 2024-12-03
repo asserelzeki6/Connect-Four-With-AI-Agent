@@ -2,12 +2,12 @@ import sys
 import os
 
 # Add the project's root directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import copy
-from  utils.scoring import heuristic, print_board
-from  utils.Node import Node
-from  utils.tree import get_children, print_tree, generate_children
+from server.utils.scoring import heuristic, print_board
+from server.utils.Node import Node
+from server.utils.tree import get_children, print_tree, generate_children
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def minimize(current_node, depth, max_depth):
     state = current_node.board
@@ -32,7 +32,7 @@ def minimize(current_node, depth, max_depth):
     
     current_node.best_move = best_child.move
     current_node.utility = min_utility
-    return current_node, min_utility
+    return current_node, best_child
 
 
 def maximize(current_node, depth, max_depth):
@@ -58,30 +58,30 @@ def maximize(current_node, depth, max_depth):
 
     current_node.best_move = best_child.move
     current_node.utility = max_utility
-    return current_node, max_utility
+    return current_node, best_child
 
 
 def minimax_decision(state, aiPlayer,max_depth):
     root_node = Node(state, aiPlayer, 0)
     if aiPlayer == 'r':
-        root_node, _ = maximize(root_node, 0, max_depth)
+        root_node, best_child = maximize(root_node, 0, max_depth)
     else:
-        root_node, _ = minimize(root_node, 0, max_depth)
+        root_node, best_child = minimize(root_node, 0, max_depth)
     root_node.isRoot = True
-    return root_node
+    return root_node, best_child
 
 
 
-# if __name__ == "__main__":
-#     boardd = [
-#         ['.', '.', '.', '.', '.', '.', '.'],
-#         ['.', '.', '.', '.', 'r', '.', '.'],
-#         ['.', '.', 'y', 'r', 'r', '.', '.'],
-#         ['.', '.', 'r', 'y', 'y', '.', '.'],
-#         ['y', 'r', 'r', 'r', 'y', 'y', 'y'],
-#         ['r', 'r', 'r', 'r', 'y', 'y', 'y']
-#     ]
-#     root, move = minimax_decision(boardd)
-#     print_board(move.board)
-#     print_tree(root)
+if __name__ == "__main__":
+    boardd = [
+        ['.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.'],
+    ]
+    root, move = minimax_decision(boardd,'r',4)
+    print_board(move.board)
+    print_tree(root)
 
