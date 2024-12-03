@@ -11,7 +11,7 @@ from utils.minimax import minimax_decision
 from utils.expected import expected_decision
 
 
-depths = range(2, 8)
+depths = range(1, 2)
 times_algo1 = []
 times_algo2 = []
 times_algo3 = []
@@ -43,86 +43,43 @@ plt.legend()
 plt.savefig(os.path.join(os.path.dirname(__file__), 'algorithm_runtime.png'))
 plt.show()
 
-# last output:
+# Output:
 # Depth: 2 started
-# alphabeta: 0.017586231231689453
-# minimax: 0.02162337303161621
-# expected: 0.027234554290771484
-# Depth: 2 done
-# minimax: 0.02162337303161621
-# minimax: 0.02162337303161621
-# minimax: 0.02162337303161621
-# expected: 0.027234554290771484
+# alphabeta: 0.0
+# minimax: 0.010590076446533203
+# expected: 0.002993345260620117
 # Depth: 2 done
 # Depth: 3 started
-# alphabeta: 0.07280325889587402
-# minimax: 0.14037299156188965
-# minimax: 0.02162337303161621
-# expected: 0.027234554290771484
-# Depth: 2 done
-# Depth: 3 started
-# alphabeta: 0.07280325889587402
-# minimax: 0.02162337303161621
-# expected: 0.027234554290771484
-# Depth: 2 done
-# Depth: 3 started
-# alphabeta: 0.07280325889587402
-# expected: 0.027234554290771484
-# Depth: 2 done
-# Depth: 3 started
-# Depth: 3 started
-# alphabeta: 0.07280325889587402
-# minimax: 0.14037299156188965
-# expected: 0.15262269973754883
+# alphabeta: 0.020944595336914062
+# minimax: 0.029100894927978516
+# expected: 0.035857439041137695
 # Depth: 3 done
 # Depth: 4 started
-# alphabeta: 0.37639498710632324
-# minimax: 1.3120026588439941
-# expected: 1.1063189506530762
-# Depth: 4 done
-# minimax: 0.14037299156188965
-# expected: 0.15262269973754883
-# Depth: 3 done
-# Depth: 4 started
-# alphabeta: 0.37639498710632324
-# minimax: 1.3120026588439941
-# expected: 1.1063189506530762
+# alphabeta: 0.08601593971252441
+# minimax: 0.22858309745788574
+# expected: 0.20847487449645996
 # Depth: 4 done
 # Depth: 5 started
-# expected: 0.15262269973754883
-# Depth: 3 done
-# Depth: 4 started
-# alphabeta: 0.37639498710632324
-# minimax: 1.3120026588439941
-# expected: 1.1063189506530762
+# alphabeta: 0.36717796325683594
+# minimax: 0.22858309745788574
+# expected: 0.20847487449645996
 # Depth: 4 done
 # Depth: 5 started
-# minimax: 1.3120026588439941
-# expected: 1.1063189506530762
+# alphabeta: 0.36717796325683594
 # Depth: 4 done
 # Depth: 5 started
-# expected: 1.1063189506530762
-# Depth: 4 done
-# Depth: 5 started
-# alphabeta: 1.3431437015533447
-# Depth: 5 started
-# alphabeta: 1.3431437015533447
-# minimax: 7.7818989753723145
-# alphabeta: 1.3431437015533447
-# minimax: 7.7818989753723145
-# minimax: 7.7818989753723145
-# expected: 7.456750154495239
+# alphabeta: 0.36717796325683594
+# alphabeta: 0.36717796325683594
+# minimax: 1.4886014461517334
+# expected: 1.5999999046325684
 # Depth: 5 done
 # Depth: 6 started
-# Depth: 5 done
-# Depth: 6 started
-# alphabeta: 5.468378067016602
-# minimax: 64.97731494903564
-# expected: 79.64130449295044
-# Depth: 6 done
+# alphabeta: 1.1268181800842285
+# minimax: 11.861638069152832
+# expected: 15.101814031600952
 # Depth: 6 done
 # Depth: 7 started
-# alphabeta: 32.1421172618866
-# minimax: 453.0930805206299
-# expected: 461.7324643135071
+# alphabeta: 5.397247552871704
+# minimax: 102.36785364151001
+# expected: 111.24937868118286
 # Depth: 7 done
